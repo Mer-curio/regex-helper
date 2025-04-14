@@ -1,33 +1,44 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>正则表达式生成器</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #f0f2f5;
-      padding: 2em;
+      padding: 1em;
+      margin: 0;
+    }
+
+    .container {
       max-width: 900px;
+      width: 95%;
       margin: auto;
     }
+
     h1 {
       text-align: center;
       color: #333;
+      font-size: 1.8em;
     }
-    。section {
+
+    .section {
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      padding: 2em;
+      padding: 1.5em;
       margin-top: 2em;
     }
+
     label {
       font-weight: bold;
       display: block;
       margin-top: 1em;
+      color: #222;
     }
+
     input[type="text"], textarea {
       width: 100%;
       padding: 0.7em;
@@ -35,7 +46,9 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 1em;
+      box-sizing: border-box;
     }
+
     button {
       margin-top: 1.5em;
       padding: 0.7em 1.5em;
@@ -45,10 +58,13 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      width: 100%;
     }
+
     button:hover {
       background-color: #0056b3;
     }
+
     .output {
       background: #fefefe;
       border: 1px solid #ccc;
@@ -56,23 +72,31 @@
       padding: 1em;
       margin-top: 1em;
     }
+
+    @media (min-width: 600px) {
+      button {
+        width: auto;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>🌐 正则表达式生成器</h1>
-  <div class="section">
-    <label>输入关键词（支持国家名、旗帜、英文）：</label>
-    <input type="text" id="inputText" placeholder="如：🇭🇰, 香港, HK, 台湾, TW, 🇨🇳" />
+  <div class="container">
+    <h1>🌐 正则表达式生成器</h1>
+    <div class="section">
+      <label>输入关键词（支持国家名、旗帜、英文）：</label>
+      <input type="text" id="inputText" placeholder="如：🇭🇰, 香港, HK, 台湾, TW, 🇨🇳" />
 
-    <label>排除关键词（用逗号分隔）：</label>
-    <input type="text" id="excludeInput" placeholder="如：IEPL, IPLC, 家宽" />
+      <label>排除关键词（用逗号分隔）：</label>
+      <input type="text" id="excludeInput" placeholder="如：IEPL, IPLC, 家宽" />
 
-    <button onclick="generateRegex()">生成正则表达式</button>
+      <button onclick="generateRegex()">生成正则表达式</button>
 
-    <div class="output">
-      <label>生成的正则表达式：</label>
-      <textarea id="output" rows="4" readonly></textarea>
-      <button onclick="copyToClipboard()">📋 复制到剪贴板</button>
+      <div class="output">
+        <label>生成的正则表达式：</label>
+        <textarea id="output" rows="4" readonly></textarea>
+        <button onclick="copyToClipboard()">📋 复制到剪贴板</button>
+      </div>
     </div>
   </div>
 
@@ -122,12 +146,12 @@
       let parts = [];
       if (zh.length) parts.push(zh.join('|'));
       if (emoji.length) parts.push("(?i)" + emoji.join('|'));
-      if (en.length) parts.push("(?i)\b(?:" + en.join('|') + ")(?:\d+)?\b");
+      if (en.length) parts.push("(?i)\\b(?:" + en.join('|') + ")(?:\\d+)?\\b");
 
       const matchPart = parts.join('|');
       const exclude = excludeText
         .split(',').map(w => w.trim()).filter(Boolean)
-        .map(w => `(?i)\b(?:${w})(?:\d+)?\b`).join('|');
+        .map(w => `(?i)\\b(?:${w})(?:\\d+)?\\b`).join('|');
 
       let regex = `^(?=.*(?:${matchPart}))`;
       if (exclude) regex += `(?!.*(?:${exclude}))`;
