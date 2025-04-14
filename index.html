@@ -11,26 +11,31 @@
       background-color: #f0f2f5;
       padding: 1em;
       margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    。container {
-      max-width: 900px;
+    .container {
+      max-width: 800px;
       width: 95%;
-      margin: auto;
+      margin: 2em auto;
     }
 
     h1 {
       text-align: center;
       color: #333;
       font-size: 1.8em;
+      margin-bottom: 1em;
     }
 
-    。section {
+    .section {
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      padding: 1.5em;
-      margin-top: 2em;
+      padding: 2em;
+      margin-top: 1em;
     }
 
     label {
@@ -43,7 +48,7 @@
     input[type="text"], textarea {
       width: 100%;
       padding: 0.7em;
-      margin-top: 0.5em;
+      margin: 0.5em 0;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 1em;
@@ -51,7 +56,7 @@
     }
 
     button {
-      margin-top: 1.5em;
+      margin: 1em 0;
       padding: 0.7em 1.5em;
       font-size: 1em;
       background-color: #007bff;
@@ -59,7 +64,7 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      width: 100%;
+      transition: background-color 0.2s;
     }
 
     button:hover {
@@ -74,9 +79,22 @@
       margin-top: 1em;
     }
 
-    @media (min-width: 600px) {
+    @media (max-width: 600px) {
+      body {
+        padding: 0.5em;
+      }
+      
+      .section {
+        padding: 1em;
+      }
+
+      .container {
+        width: 100%;
+        margin: 0;
+      }
+
       button {
-        width: auto;
+        width: 100%;
       }
     }
   </style>
