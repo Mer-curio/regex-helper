@@ -118,7 +118,10 @@
     function getGroups(inputText) {
       const all = inputText.split(',').map(x => x.trim()).filter(Boolean);
       let zh = [], emoji = [], en = [];
+      
       for (let word of all) {
+        let found = false;
+        // 检查是否是预定义的国家关键词
         for (const key in countryKeywords) {
           const matchList = countryKeywords[key];
           if (matchList.includes(word)) {
@@ -127,10 +130,19 @@
               else if (/^🇦|🇧|🇨|🇩|🇪|🇫|🇬|🇭|🇮|🇯|🇰|🇱|🇲|🇳|🇴|🇵|🇶|🇷|🇸|🇹|🇺|🇻|🇼|🇽|🇾|🇿/.test(k)) emoji.push(k);
               else en.push(k);
             }
+            found = true;
             break;
           }
         }
+        
+        // 如果不是预定义的国家关键词，则根据字符类型分类
+        if (!found) {
+          if (/^[一-龥]+$/.test(word)) zh.push(word);
+          else if (/^🇦|🇧|🇨|🇩|🇪|🇫|🇬|🇭|🇮|🇯|🇰|🇱|🇲|🇳|🇴|🇵|🇶|🇷|🇸|🇹|🇺|🇻|🇼|🇽|🇾|🇿/.test(word)) emoji.push(word);
+          else en.push(word);
+        }
       }
+      
       return {
         zh: [...new Set(zh)],
         emoji: [...new Set(emoji)],
