@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>正则表达式生成器 v3</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
+      padding: 2em;
+      max-width: 900px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .section {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 2em;
+      margin-top: 2em;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 1em;
+    }
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 0.7em;
+      margin-top: 0.5em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+    }
+    button {
+      margin-top: 1.5em;
+      padding: 0.7em 1.5em;
+      font-size: 1em;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .output {
+      background: #fefefe;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 1em;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌐 正则表达式生成器 v3</h1>
+  <div class="section">
+    <label>输入关键词（支持国家名、旗帜、英文）：</label>
+    <input type="text" id="inputText" placeholder="如：🇭🇰, 香港, HK, 台湾, TW, 🇨🇳" />
+
+    <label>排除关键词（用逗号分隔）：</label>
+    <input type="text" id="excludeInput" placeholder="如：IEPL, IPLC, 家宽" />
+
+    <button onclick="generateRegex()">生成正则表达式</button>
+
+    <div class="output">
+      <label>生成的正则表达式：</label>
+      <textarea id="output" rows="4" readonly></textarea>
+      <button onclick="copyToClipboard()">📋 复制到剪贴板</button>
+    </div>
+  </div>
+
+  <script>
+    const countryKeywords = {
+      "香港": ["香港", "🇭🇰", "HK", "Hong"],
+      "台湾": ["台湾", "🇹🇼", "TW", "Taiwan"],
+      "中国": ["中国", "🇨🇳", "CN", "China"],
+      "美国": ["美国", "🇺🇸", "US", "USA", "America"],
+      "日本": ["日本", "🇯🇵", "JP", "Japan"],
+      "新加坡": ["新加坡", "🇸🇬", "SG", "Singapore"],
+      "越南": ["越南", "🇻🇳", "VN", "Vietnam"],
+      "韩国": ["韩国", "🇰🇷", "KR", "Korea"],
+      "英国": ["英国", "🇬🇧", "UK", "UnitedKingdom"],
+      "印度": ["印度", "🇮🇳", "IN", "India"]
+    };
+
+    function getGroups(inputText) {
+      const all = inputText.split(',').map(x => x.trim()).filter(Boolean);
+      let zh = [], emoji = [], en = [];
+      for (let word of all) {
+        for (const key in countryKeywords) {
+          const matchList = countryKeywords[key];
+          if (matchList.includes(word)) {
+            for (let k of matchList) {
+              if (/^[一-龥]+$/.test(k)) zh.push(k);
+              else if (/^🇦|🇧|🇨|🇩|🇪|🇫|🇬|🇭|🇮|🇯|🇰|🇱|🇲|🇳|🇴|🇵|🇶|🇷|🇸|🇹|🇺|🇻|🇼|🇽|🇾|🇿/.test(k)) emoji.push(k);
+              else en.push(k);
+            }
+            break;
+          }
+        }
+      }
+      return {
+        zh: [...new Set(zh)],
+        emoji: [...new Set(emoji)],
+        en: [...new Set(en)]
+      };
+    }
+
+    function generateRegex() {
+      const inputText = document.getElementById('inputText').value;
+      const excludeText = document.getElementById('excludeInput').value;
+
+      const { zh, emoji, en } = getGroups(inputText);
+
+      let parts = [];
+      if (zh.length) parts.push(zh.join('|'));
+      if (emoji.length) parts.push("(?i)" + emoji.join('|'));
+      if (en.length) parts.push("(?i)\b(?:" + en.join('|') + ")(?:\d+)?\b");
+
+      const matchPart = parts.join('|');
+      const exclude = excludeText
+        .split(',').map(w => w.trim()).filter(Boolean)
+        .map(w => `(?i)\b(?:${w})(?:\d+)?\b`).join('|');
+
+      let regex = `^(?=.*(?:${matchPart}))`;
+      if (exclude) regex += `(?!.*(?:${exclude}))`;
+      regex += '.*$';
+
+      document.getElementById('output').value = regex;
+    }
+
+    function copyToClipboard() {
+      const text = document.getElementById('output');
+      text.select();
+      document.execCommand('copy');
+      alert('✅ 已复制到剪贴板！');
+    }
+  </script>
+</body>
+</html>
