@@ -61,10 +61,10 @@
 <body>
   <h1>🌐 正则表达式生成器</h1>
   <div class="section">
-    <label>输入关键词组（多个组用分号分隔，每组内关键词用逗号）：</label>
+    <label>输入关键词组（多个组用分号分隔；每组内关键词用英文逗号分隔）：</label>
     <input type="text" id="inputText" placeholder="如：香港,台湾; 普通" />
 
-    <label>排除关键词（用逗号分隔）：</label>
+    <label>排除关键词（用英文逗号分隔，可选）：</label>
     <input type="text" id="excludeInput" placeholder="如：IEPL, IPLC, 家宽" />
 
     <button onclick="generateRegex()">生成正则表达式</button>
@@ -78,7 +78,7 @@
 
   <script>
     const countryKeywords = {
-      "香港": ["香港", "🇭🇰", "HK", "Hong"],
+      "香港": ["香港", "🇭🇭", "HK", "Hong"],
       "台湾": ["台湾", "🇹🇼", "TW", "Taiwan"],
       "中国": ["中国", "🇨🇳", "CN", "China"],
       "美国": ["美国", "🇺🇸", "US", "USA", "America"],
@@ -103,6 +103,7 @@
       const inputText = document.getElementById('inputText').value;
       const excludeText = document.getElementById('excludeInput').value;
 
+      // 处理输入关键词组
       const groups = inputText.split(';').map(group => group.split(',').map(w => w.trim()).filter(Boolean));
       const positiveLookaheads = [];
 
@@ -117,13 +118,17 @@
         }
       }
 
+      // 处理排除关键词
       const excludeParts = excludeText.split(',').map(w => w.trim()).filter(Boolean);
       const negativeLookaheads = excludeParts.map(w => {
         const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         return `(?!.*(?:${escaped}))`;
       });
 
-      const regex = `^${positiveLookaheads.join('')}${negativeLookaheads.join('')}.*$`;
+      // 生成正则表达式
+      const regex = `^(?=.*(?:${positiveLookaheads.join('|')}))${negativeLookaheads.join('')}.*$`;
+
+      // 输出生成的正则表达式
       document.getElementById('output').value = regex;
     }
 
