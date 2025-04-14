@@ -2,62 +2,42 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>正则表达式生成器</title>
-  <link rel="icon" href="favicon.png" type="image/x-icon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #f0f2f5;
-      padding: 1em;
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
+      padding: 2em;
+      max-width: 900px;
+      margin: auto;
     }
-
-    .container {
-      max-width: 800px;
-      width: 95%;
-      margin: 2em auto;
-      padding-top: 2vh;
-    }
-
     h1 {
       text-align: center;
       color: #333;
-      font-size: 1.8em;
-      margin: 0.5em 0;
     }
-
     .section {
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      padding: 1.5em;
-      margin-top: 1em;
+      padding: 2em;
+      margin-top: 2em;
     }
-
     label {
       font-weight: bold;
       display: block;
       margin-top: 1em;
-      color: #222;
     }
-
     input[type="text"], textarea {
       width: 100%;
       padding: 0.7em;
-      margin: 0.5em 0;
+      margin-top: 0.5em;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 1em;
-      box-sizing: border-box;
     }
-
     button {
-      margin: 1em 0;
+      margin-top: 1.5em;
       padding: 0.7em 1.5em;
       font-size: 1em;
       background-color: #007bff;
@@ -65,13 +45,10 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.2s;
     }
-
     button:hover {
       background-color: #0056b3;
     }
-
     .output {
       background: #fefefe;
       border: 1px solid #ccc;
@@ -79,140 +56,23 @@
       padding: 1em;
       margin-top: 1em;
     }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 0.5em;
-      }
-      
-      .section {
-        padding: 1em;
-      }
-
-      .container {
-        width: 100%;
-        margin: 0;
-      }
-
-      button {
-        width: 100%;
-      }
-    }
-
-    .option-group {
-      margin: 1em 0;
-      padding: 0.5em 0;
-      border-bottom: 1px solid #eee;
-    }
-    
-    .radio-label, .checkbox-label {
-      display: inline-block;
-      margin-right: 1.5em;
-      font-weight: normal;
-      cursor: pointer;
-    }
-    
-    .radio-label input[type="radio"],
-    .checkbox-label input[type="checkbox"] {
-      margin-right: 0.5em;
-    }
-
-    .preview {
-      margin-top: 1.5em;
-      padding-top: 1em;
-      border-top: 1px solid #eee;
-    }
-
-    .preview-content {
-      margin-top: 0.5em;
-    }
-
-    .preview-item {
-      margin-bottom: 1em;
-    }
-
-    .test-result {
-      margin-top: 0.5em;
-      padding: 0.5em;
-      border-radius: 4px;
-      font-family: monospace;
-    }
-
-    .test-result.match {
-      background-color: #e8f5e9;
-      color: #2e7d32;
-    }
-
-    .test-result.no-match {
-      background-color: #ffebee;
-      color: #c62828;
-    }
-
-    #testInput {
-      width: 100%;
-      padding: 0.7em;
-      margin-top: 0.5em;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1em;
-      box-sizing: border-box;
-    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🌐 正则表达式生成器</h1>
-    <div class="section">
-      <label>输入关键词（支持国家名、旗帜、英文）：</label>
-      <input type="text" id="inputText" placeholder="如：🇭🇰, 香港, HK, 台湾, TW, 🇨🇳" />
+  <h1>🌐 正则表达式生成器</h1>
+  <div class="section">
+    <label>输入关键词（支持国家名自动扩展）：</label>
+    <input type="text" id="inputText" placeholder="如：🇭🇰, 香港, HK, 台湾, TW, 🇨🇳, 自定义关键词" />
 
-      <div class="option-group">
-        <label class="radio-label">
-          <input type="radio" name="matchType" value="or" checked> 匹配任意关键词（或）
-        </label>
-        <label class="radio-label">
-          <input type="radio" name="matchType" value="and"> 同时匹配所有关键词（与）
-        </label>
-      </div>
+    <label>排除关键词（用逗号分隔）：</label>
+    <input type="text" id="excludeInput" placeholder="如：IEPL, IPLC, 家宽" />
 
-      <div class="option-group">
-        <label class="checkbox-label">
-          <input type="checkbox" id="autoExpandCountry" checked> 自动展开国家关键词
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="caseSensitive"> 区分大小写
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="strictMatch"> 严格匹配（完整词）
-        </label>
-      </div>
+    <button onclick="generateRegex()">生成正则表达式</button>
 
-      <label>排除关键词（用逗号分隔）：</label>
-      <input type="text" id="excludeInput" placeholder="如：IEPL, IPLC, 家宽" />
-
-      <div class="option-group">
-        <label class="checkbox-label">
-          <input type="checkbox" id="excludeStrict"> 严格排除（完整词）
-        </label>
-      </div>
-
-      <button onclick="generateRegex()">生成正则表达式</button>
-
-      <div class="output">
-        <label>生成的正则表达式：</label>
-        <textarea id="output" rows="4" readonly></textarea>
-        <button onclick="copyToClipboard()">📋 复制到剪贴板</button>
-      </div>
-
-      <div class="preview">
-        <label>匹配预览：</label>
-        <div class="preview-content">
-          <div class="preview-item">
-            <input type="text" id="testInput" placeholder="在此输入测试文本..." oninput="updatePreview()">
-            <div id="testResult" class="test-result"></div>
-          </div>
-        </div>
-      </div>
+    <div class="output">
+      <label>生成的正则表达式：</label>
+      <textarea id="output" rows="4" readonly></textarea>
+      <button onclick="copyToClipboard()">📋 复制到剪贴板</button>
     </div>
   </div>
 
@@ -230,36 +90,29 @@
       "印度": ["印度", "🇮🇳", "IN", "India"]
     };
 
-    function getGroups(inputText, autoExpand = true) {
+    function getGroups(inputText) {
       const all = inputText.split(',').map(x => x.trim()).filter(Boolean);
-      let zh = [], emoji = [], en = [];
-      
+      let zh = [], emoji = [], en = [], others = [];
       for (let word of all) {
-        let found = false;
-        // 检查是否是预定义的国家关键词
-        if (autoExpand) {
-          for (const key in countryKeywords) {
-            const matchList = countryKeywords[key];
-            if (matchList.includes(word)) {
-              for (let k of matchList) {
-                if (/^[一-龥]+$/.test(k)) zh.push(k);
-                else if (/^🇦|🇧|🇨|🇩|🇪|🇫|🇬|🇭|🇮|🇯|🇰|🇱|🇲|🇳|🇴|🇵|🇶|🇷|🇸|🇹|🇺|🇻|🇼|🇽|🇾|🇿/.test(k)) emoji.push(k);
-                else en.push(k);
-              }
-              found = true;
-              break;
+        let matched = false;
+        for (const key in countryKeywords) {
+          const matchList = countryKeywords[key];
+          if (matchList.includes(word)) {
+            matched = true;
+            for (let k of matchList) {
+              if (/^[一-龥]+$/.test(k)) zh.push(k);
+              else if (/^🇦|🇧|🇨|🇩|🇪|🇫|🇬|🇭|🇮|🇯|🇰|🇱|🇲|🇳|🇴|🇵|🇶|🇷|🇸|🇹|🇺|🇻|🇼|🇽|🇾|🇿/.test(k)) emoji.push(k);
+              else en.push(k);
             }
+            break;
           }
         }
-        
-        // 如果不是预定义的国家关键词或不自动展开，则直接分类
-        if (!found) {
+        if (!matched) {
           if (/^[一-龥]+$/.test(word)) zh.push(word);
           else if (/^🇦|🇧|🇨|🇩|🇪|🇫|🇬|🇭|🇮|🇯|🇰|🇱|🇲|🇳|🇴|🇵|🇶|🇷|🇸|🇹|🇺|🇻|🇼|🇽|🇾|🇿/.test(word)) emoji.push(word);
           else en.push(word);
         }
       }
-      
       return {
         zh: [...new Set(zh)],
         emoji: [...new Set(emoji)],
@@ -267,83 +120,27 @@
       };
     }
 
-    function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
     function generateRegex() {
       const inputText = document.getElementById('inputText').value;
       const excludeText = document.getElementById('excludeInput').value;
-      const matchType = document.querySelector('input[name="matchType"]:checked').value;
-      const autoExpand = document.getElementById('autoExpandCountry').checked;
-      const caseSensitive = document.getElementById('caseSensitive').checked;
-      const strictMatch = document.getElementById('strictMatch').checked;
-      const excludeStrict = document.getElementById('excludeStrict').checked;
 
-      const { zh, emoji, en } = getGroups(inputText, autoExpand);
+      const { zh, emoji, en } = getGroups(inputText);
 
       let parts = [];
-      if (zh.length) {
-        const zhPart = zh.map(x => escapeRegExp(x)).join('|');
-        parts.push(strictMatch ? `\\b(?:${zhPart})\\b` : zhPart);
-      }
-      if (emoji.length) {
-        parts.push(emoji.map(x => escapeRegExp(x)).join('|'));
-      }
-      if (en.length) {
-        const enPart = en.map(x => escapeRegExp(x)).join('|');
-        parts.push(strictMatch ? `\\b(?:${enPart})\\b` : enPart);
-      }
+      if (zh.length) parts.push(zh.join('|'));
+      if (emoji.length) parts.push("(?i)" + emoji.join('|'));
+      if (en.length) parts.push("(?i)\\b(?:" + en.join('|') + ")(?:\\d+)?\\b");
 
+      const matchPart = parts.join('|');
       const exclude = excludeText
-        .split(',')
-        .map(w => w.trim())
-        .filter(Boolean)
-        .map(w => escapeRegExp(w))
-        .map(w => excludeStrict ? `\\b(?:${w})\\b` : w)
-        .join('|');
+        .split(',').map(w => w.trim()).filter(Boolean)
+        .map(w => `(?i)\\b(?:${w})(?:\\d+)?\\b`).join('|');
 
-      let regex = '^';
-      
-      if (matchType === 'and') {
-        // 使用正向预查实现"与"操作
-        parts.forEach(part => {
-          regex += `(?=.*${caseSensitive ? '' : '(?i)'}(?:${part}))`;
-        });
-      } else {
-        // "或"操作
-        regex += `(?=.*${caseSensitive ? '' : '(?i)'}(?:${parts.join('|')}))`;
-      }
-
-      if (exclude) {
-        regex += `(?!.*${caseSensitive ? '' : '(?i)'}(?:${exclude}))`;
-      }
+      let regex = `^(?=.*(?:${matchPart}))`;
+      if (exclude) regex += `(?!.*(?:${exclude}))`;
       regex += '.*$';
 
       document.getElementById('output').value = regex;
-      updatePreview();
-    }
-
-    function updatePreview() {
-      const regex = document.getElementById('output').value;
-      const testInput = document.getElementById('testInput').value;
-      const testResult = document.getElementById('testResult');
-      
-      if (!regex || !testInput) {
-        testResult.textContent = '等待输入...';
-        testResult.className = 'test-result';
-        return;
-      }
-
-      try {
-        const re = new RegExp(regex);
-        const matches = re.test(testInput);
-        testResult.textContent = matches ? '✓ 匹配成功' : '✗ 不匹配';
-        testResult.className = `test-result ${matches ? 'match' : 'no-match'}`;
-      } catch (e) {
-        testResult.textContent = '正则表达式错误：' + e.message;
-        testResult.className = 'test-result no-match';
-      }
     }
 
     function copyToClipboard() {
