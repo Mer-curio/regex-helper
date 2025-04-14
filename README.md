@@ -23,9 +23,9 @@
 
 1. 打开网页 👉 [https://regex-helper-rho.vercel.app/](https://regex-helper-rho.vercel.app/)
 2. 在对应输入框中填写关键词：
-   - 中文关键词（用 `,` 分隔）
-   - Emoji 旗帜关键词（用 `,` 分隔）
-   - 英文关键词（用 `,` 分隔）
+   - 中文关键词（用英文 `,` 分隔）
+   - Emoji 旗帜关键词（用英文 `,` 分隔）
+   - 英文关键词（用英文 `,` 分隔）
    - 可选：排除关键词
 3. 点击【生成正则表达式】
 4. 复制结果即可使用于 Clash、Shadowrocket、Loon 等节点筛选
