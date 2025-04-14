@@ -98,6 +98,21 @@
         width: 100%;
       }
     }
+
+    .option-group {
+      margin: 1em 0;
+      padding: 0.5em 0;
+    }
+    
+    .radio-label {
+      display: inline-block;
+      margin-right: 1.5em;
+      font-weight: normal;
+    }
+    
+    .radio-label input[type="radio"] {
+      margin-right: 0.5em;
+    }
   </style>
 </head>
 <body>
@@ -106,6 +121,15 @@
     <div class="section">
       <label>输入关键词（支持国家名、旗帜、英文）：</label>
       <input type="text" id="inputText" placeholder="如：🇭🇰, 香港, HK, 台湾, TW, 🇨🇳" />
+
+      <div class="option-group">
+        <label class="radio-label">
+          <input type="radio" name="matchType" value="or" checked> 匹配任意关键词（或）
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="matchType" value="and"> 同时匹配所有关键词（与）
+        </label>
+      </div>
 
       <label>排除关键词（用逗号分隔）：</label>
       <input type="text" id="excludeInput" placeholder="如：IEPL, IPLC, 家宽" />
@@ -172,6 +196,7 @@
     function generateRegex() {
       const inputText = document.getElementById('inputText').value;
       const excludeText = document.getElementById('excludeInput').value;
+      const matchType = document.querySelector('input[name="matchType"]:checked').value;
 
       const { zh, emoji, en } = getGroups(inputText);
 
@@ -185,8 +210,21 @@
         .split(',').map(w => w.trim()).filter(Boolean)
         .map(w => `(?i)\\b(?:${w})(?:\\d+)?\\b`).join('|');
 
-      let regex = `^(?=.*(?:${matchPart}))`;
-      if (exclude) regex += `(?!.*(?:${exclude}))`;
+      let regex;
+      if (matchType === 'and') {
+        // 使用正向预查实现"与"操作
+        regex = '^';
+        parts.forEach(part => {
+          regex += `(?=.*(?:${part}))`;
+        });
+      } else {
+        // 原有的"或"操作
+        regex = `^(?=.*(?:${matchPart}))`;
+      }
+
+      if (exclude) {
+        regex += `(?!.*(?:${exclude}))`;
+      }
       regex += '.*$';
 
       document.getElementById('output').value = regex;
