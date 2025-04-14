@@ -61,8 +61,8 @@
 <body>
   <h1>🌐 正则表达式生成器</h1>
   <div class="section">
-    <label>输入关键词（支持国家名自动扩展）：</label>
-    <input type="text" id="inputText" placeholder="如：🇭🇰, 香港, HK, 台湾, TW, 🇨🇳, 自定义关键词" />
+    <label>输入关键词组（多个组用分号分隔，每组内关键词用逗号）：</label>
+    <input type="text" id="inputText" placeholder="如：香港,台湾; 普通" />
 
     <label>排除关键词（用逗号分隔）：</label>
     <input type="text" id="excludeInput" placeholder="如：IEPL, IPLC, 家宽" />
@@ -90,56 +90,40 @@
       "印度": ["印度", "🇮🇳", "IN", "India"]
     };
 
-    function getGroups(inputText) {
-      const all = inputText.split(',').map(x => x.trim()).filter(Boolean);
-      let zh = [], emoji = [], en = [], others = [];
-      for (let word of all) {
-        let matched = false;
-        for (const key in countryKeywords) {
-          const matchList = countryKeywords[key];
-          if (matchList.includes(word)) {
-            matched = true;
-            for (let k of matchList) {
-              if (/^[一-龥]+$/.test(k)) zh.push(k);
-              else if (/^🇦|🇧|🇨|🇩|🇪|🇫|🇬|🇭|🇮|🇯|🇰|🇱|🇲|🇳|🇴|🇵|🇶|🇷|🇸|🇹|🇺|🇻|🇼|🇽|🇾|🇿/.test(k)) emoji.push(k);
-              else en.push(k);
-            }
-            break;
-          }
-        }
-        if (!matched) {
-          if (/^[一-龥]+$/.test(word)) zh.push(word);
-          else if (/^🇦|🇧|🇨|🇩|🇪|🇫|🇬|🇭|🇮|🇯|🇰|🇱|🇲|🇳|🇴|🇵|🇶|🇷|🇸|🇹|🇺|🇻|🇼|🇽|🇾|🇿/.test(word)) emoji.push(word);
-          else en.push(word);
+    function expandKeywords(keyword) {
+      for (const key in countryKeywords) {
+        if (countryKeywords[key].includes(keyword)) {
+          return countryKeywords[key];
         }
       }
-      return {
-        zh: [...new Set(zh)],
-        emoji: [...new Set(emoji)],
-        en: [...new Set(en)]
-      };
+      return [keyword];
     }
 
     function generateRegex() {
       const inputText = document.getElementById('inputText').value;
       const excludeText = document.getElementById('excludeInput').value;
 
-      const { zh, emoji, en } = getGroups(inputText);
+      const groups = inputText.split(';').map(group => group.split(',').map(w => w.trim()).filter(Boolean));
+      const positiveLookaheads = [];
 
-      let parts = [];
-      if (zh.length) parts.push(zh.join('|'));
-      if (emoji.length) parts.push("(?i)" + emoji.join('|'));
-      if (en.length) parts.push("(?i)\\b(?:" + en.join('|') + ")(?:\\d+)?\\b");
+      for (const group of groups) {
+        let expandedGroup = [];
+        for (const kw of group) {
+          expandedGroup.push(...expandKeywords(kw));
+        }
+        const clean = [...new Set(expandedGroup)].map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        if (clean.length > 0) {
+          positiveLookaheads.push(`(?=.*(?:${clean.join('|')}))`);
+        }
+      }
 
-      const matchPart = parts.join('|');
-      const exclude = excludeText
-        .split(',').map(w => w.trim()).filter(Boolean)
-        .map(w => `(?i)\\b(?:${w})(?:\\d+)?\\b`).join('|');
+      const excludeParts = excludeText.split(',').map(w => w.trim()).filter(Boolean);
+      const negativeLookaheads = excludeParts.map(w => {
+        const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return `(?!.*(?:${escaped}))`;
+      });
 
-      let regex = `^(?=.*(?:${matchPart}))`;
-      if (exclude) regex += `(?!.*(?:${exclude}))`;
-      regex += '.*$';
-
+      const regex = `^${positiveLookaheads.join('')}${negativeLookaheads.join('')}.*$`;
       document.getElementById('output').value = regex;
     }
 
